@@ -1,11 +1,10 @@
 <idea-plugin>
     <id>com.liferay.project-reference-replacer</id>
-    <name>Plugin display name here</name>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <name>Liferay Project Reference Replacer</name>
+    <vendor email="dante.wang@liferay.com" url="https://github.com/dantewang">Dante Wang</vendor>
 
     <description><![CDATA[
-    Enter short description for your plugin here.<br>
-    <em>most HTML tags may be used</em>
+IntelliJ plugin to automatically replace artifact references of portal-kernel, etc. in Gradle imported modules with module references.
     ]]></description>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
