@@ -56,9 +56,14 @@ public class DependencyReplacerDataService extends AbstractProjectDataService<Li
                     continue;
                 }
 
-                @NotNull Module targetModule = ideModelsProvider.findIdeModule(artifactMapping.getValue());
-                @NotNull Module ownerModule = ideModelsProvider.findIdeModule(libraryDependencyData.getOwnerModule());
-                @NotNull LibraryOrderEntry libraryOrderEntry =
+                Module targetModule = ideModelsProvider.findIdeModule(artifactMapping.getValue());
+
+                if (targetModule == null) {
+                    continue;
+                }
+
+                Module ownerModule = ideModelsProvider.findIdeModule(libraryDependencyData.getOwnerModule());
+                LibraryOrderEntry libraryOrderEntry =
                     (LibraryOrderEntry)ideModelsProvider.findIdeModuleOrderEntry(libraryDependencyData);
 
                 ModuleRootModificationUtil.updateModel(
