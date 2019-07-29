@@ -23,12 +23,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author Dante Wang
  */
 @Order(ExternalSystemConstants.UNORDERED)
-public class DependencyReplacerDataService extends AbstractProjectDataService<LibraryDependencyData, Module> {
+public class DependencyReplacerDataService
+    extends AbstractProjectDataService<LibraryDependencyData, Module> {
 
     @NotNull
     @Override
@@ -38,7 +41,8 @@ public class DependencyReplacerDataService extends AbstractProjectDataService<Li
 
     @Override
     public void onSuccessImport(
-        @NotNull Collection<DataNode<LibraryDependencyData>> libraryDependencyDataNodes,
+        @NotNull Collection<DataNode<LibraryDependencyData>>
+            libraryDependencyDataNodes,
         @Nullable ProjectData projectData, @NotNull Project project,
         @NotNull IdeModelsProvider ideModelsProvider) {
 
@@ -46,33 +50,59 @@ public class DependencyReplacerDataService extends AbstractProjectDataService<Li
             return;
         }
 
-        for (DataNode<LibraryDependencyData> libraryDependencyDataNode : libraryDependencyDataNodes) {
-            LibraryDependencyData libraryDependencyData = libraryDependencyDataNode.getData();
+        for (DataNode<LibraryDependencyData> libraryDependencyDataNode :
+                libraryDependencyDataNodes) {
 
-            String dependencyExternalName = libraryDependencyData.getExternalName();
+            LibraryDependencyData libraryDependencyData =
+                libraryDependencyDataNode.getData();
 
-            for (Map.Entry<String, String> artifactMapping : _artifactMappings.entrySet()) {
-                if (!dependencyExternalName.startsWith(artifactMapping.getKey())) {
+            String dependencyExternalName =
+                libraryDependencyData.getExternalName();
+
+            Module ownerModule = null;
+
+            for (Map.Entry<String, String> artifactMapping :
+                    _artifactMappings.entrySet()) {
+
+                if (!dependencyExternalName.startsWith(
+                        artifactMapping.getKey())) {
+
                     continue;
                 }
 
-                Module targetModule = ideModelsProvider.findIdeModule(artifactMapping.getValue());
+                Module targetModule = _artifacts.computeIfAbsent(
+                    artifactMapping.getValue(),
+					ideModelsProvider::findIdeModule);
 
                 if (targetModule == null) {
                     continue;
                 }
 
-                Module ownerModule = ideModelsProvider.findIdeModule(libraryDependencyData.getOwnerModule());
+                if (ownerModule == null) {
+                    ownerModule = ideModelsProvider.findIdeModule(
+                        libraryDependencyData.getOwnerModule());
+                }
+
+                if (ownerModule == null) {
+                    _log.warn("libraryDependencyData owner not found");
+
+                    return;
+                }
+
                 LibraryOrderEntry libraryOrderEntry =
-                    (LibraryOrderEntry)ideModelsProvider.findIdeModuleOrderEntry(libraryDependencyData);
+                    (LibraryOrderEntry)ideModelsProvider.
+                        findIdeModuleOrderEntry(libraryDependencyData);
 
                 ModuleRootModificationUtil.updateModel(
                     ownerModule,
                     ownerModuleModel -> {
                         ownerModuleModel.removeOrderEntry(
-                            ownerModuleModel.findLibraryOrderEntry(libraryOrderEntry.getLibrary()));
+                            ownerModuleModel.findLibraryOrderEntry(
+                                libraryOrderEntry.getLibrary()));
 
-                        ModuleOrderEntry moduleOrderEntry = ownerModuleModel.addModuleOrderEntry(targetModule);
+                        ModuleOrderEntry moduleOrderEntry =
+                            ownerModuleModel.addModuleOrderEntry(targetModule);
+
                         moduleOrderEntry.setScope(DependencyScope.COMPILE);
                         moduleOrderEntry.setExported(false);
                     });
@@ -82,13 +112,18 @@ public class DependencyReplacerDataService extends AbstractProjectDataService<Li
 
     private static final String _GROUP_ID = "com.liferay.portal";
 
-    private static final Map<String, String> _artifactMappings = new HashMap<String, String>() {
-        {
-            put(_GROUP_ID + ":com.liferay.portal.impl", "portal-impl");
-            put(_GROUP_ID + ":com.liferay.portal.kernel", "portal-kernel");
-        }
-    };
+    private static final Map<String, String> _artifactMappings =
+        new HashMap<String, String>() {
+            {
+                put(_GROUP_ID + ":com.liferay.portal.impl", "portal-impl");
+                put(_GROUP_ID + ":com.liferay.portal.kernel", "portal-kernel");
+            }
+        };
 
-    private static final Logger _log = Logger.getInstance(DependencyReplacerDataService.class);
+    private static final Logger _log = Logger.getInstance(
+        DependencyReplacerDataService.class);
+
+    private final ConcurrentMap<String, Module> _artifacts =
+        new ConcurrentHashMap<>();
 
 }
