@@ -50,6 +50,8 @@ public class DependencyReplacerDataService
 			return;
 		}
 
+		_log.info(" ### Scan and replace dependencies ### ");
+
 		for (DataNode<LibraryDependencyData> libraryDependencyDataNode :
 			libraryDependencyDataNodes) {
 
