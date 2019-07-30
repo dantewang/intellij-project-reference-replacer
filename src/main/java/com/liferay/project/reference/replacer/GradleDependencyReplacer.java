@@ -118,11 +118,11 @@ public class GradleDependencyReplacer extends AbstractProjectResolverExtension {
         return field.get(object);
     }
 
-    private static final String _GROUP_NAME = "com.liferay.portal";
+    private static final String _GROUP_NAME = "javax.servlet";
 
     private static final Map<String, String> _artifactMappings = new HashMap<String, String>() {
         {
-            put("com.liferay.portal.impl", "portal-impl");
+            put("javax.servlet-api", "portal-impl");
             put("com.liferay.portal.kernel", "portal-kernel");
         }
     };
