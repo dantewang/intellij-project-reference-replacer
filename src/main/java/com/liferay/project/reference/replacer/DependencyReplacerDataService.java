@@ -168,6 +168,8 @@ public class DependencyReplacerDataService
 
 		List<DependencyMapping> populatedMappings = ReadAction.compute(
 			() -> dependencyMappings.stream(
+				).filter(
+					dependencyMapping -> !dependencyMapping._owner.isDisposed()
 				).map(
 					dependencyMapping -> {
 						ModuleRootManager moduleRootManager =
