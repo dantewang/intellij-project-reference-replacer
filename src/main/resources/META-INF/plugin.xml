@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.liferay.project-reference-replacer</id>
     <name>Liferay Project Reference Replacer</name>
-    <vendor email="dante.wang@liferay.com" url="https://github.com/dantewang">Dante Wang</vendor>
+    <vendor url="https://github.com/dantewang">Dante Wang</vendor>
 
     <description><![CDATA[
 IntelliJ plugin to automatically replace artifact references of portal-kernel, etc. in Gradle imported modules with module references.
@@ -14,7 +14,7 @@ IntelliJ plugin to automatically replace artifact references of portal-kernel, e
     -->
 
     <extensions defaultExtensionNs="com.intellij">
-        <externalProjectDataService implementation="com.liferay.project.reference.replacer.DependencyReplacerDataService" />
+        <externalProjectDataService implementation="io.dante.intellij.project.reference.replacer.DependencyReplacerDataService" />
     </extensions>
 
     <actions>

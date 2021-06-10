@@ -1,4 +1,4 @@
-package com.liferay.project.reference.replacer;
+package io.dante.intellij.project.reference.replacer;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;

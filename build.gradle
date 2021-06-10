@@ -3,7 +3,7 @@ plugins {
     id 'org.jetbrains.intellij' version '0.7.2'
 }
 
-group 'com.liferay'
+group 'io.dante'
 version '1.0.0'
 
 sourceCompatibility = 11
