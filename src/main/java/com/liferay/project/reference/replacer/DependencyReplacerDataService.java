@@ -23,7 +23,6 @@ import com.intellij.openapi.roots.ModuleOrderEntry;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.impl.ModifiableModelCommitter;
 import com.intellij.openapi.roots.libraries.Library;
-import com.intellij.util.Consumer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -118,53 +117,24 @@ public class DependencyReplacerDataService
 			dependencyMapping._dependencyMappingItems.add(
 				new DependencyMappingItem(
 					originalDependency, replacementDependency));
+
+			if (_dependencyMappings.size() == _COMMIT_GROUP_SIZE) {
+				_updateModel(
+					project, new ArrayList<>(_dependencyMappings.values()));
+
+				_dependencyMappings.clear();
+			}
 		}
 
 		_updateModel(
-			project, new ArrayList<>(_dependencyMappings.values()),
-			dependencyMapping -> {
-				ModifiableRootModel ownerModel = dependencyMapping._ownerModel;
+			project, new ArrayList<>(_dependencyMappings.values()));
 
-				for (DependencyMappingItem dependencyMappingItem :
-						dependencyMapping._dependencyMappingItems) {
-
-					Library library =
-						dependencyMappingItem._originalDependency.getLibrary();
-
-					if (library == null) {
-						continue;
-					}
-
-					LibraryOrderEntry libraryOrderEntry =
-						ownerModel.findLibraryOrderEntry(library);
-
-					if (libraryOrderEntry == null) {
-						continue;
-					}
-
-					ownerModel.removeOrderEntry(libraryOrderEntry);
-
-					ModuleOrderEntry moduleOrderEntry =
-						ownerModel.addModuleOrderEntry(
-							dependencyMappingItem._replacementDependency);
-
-					moduleOrderEntry.setScope(
-						dependencyMappingItem._originalDependency.getScope());
-					moduleOrderEntry.setExported(false);
-
-					_log.info(
-						" ### Modified " + ownerModel.getModule().getName() +
-							" for " +
-								dependencyMappingItem._replacementDependency.
-									getName());
-				}
-			});
+		_log.info(" ### All dependencies replaced ### ");
 	}
 
 	private void _updateModel(
 		@NotNull Project project,
-		@NotNull List<DependencyMapping> dependencyMappings,
-		@NotNull Consumer<DependencyMapping> task) {
+		@NotNull List<DependencyMapping> dependencyMappings) {
 
 		List<DependencyMapping> populatedMappings = ReadAction.compute(
 			() -> dependencyMappings.stream(
@@ -186,7 +156,18 @@ public class DependencyReplacerDataService
 				));
 
 		try {
-			populatedMappings.forEach(task::consume);
+			int count = 0;
+
+			for (DependencyMapping populatedMapping : populatedMappings) {
+				_updateMapping(populatedMapping);
+
+				count++;
+
+				_log.info(
+					" ### Finished " + count + "/" + populatedMappings.size());
+			}
+
+			_totalCount += count;
 
 			ApplicationManager.getApplication().invokeAndWait(
 				() -> WriteAction.run(
@@ -197,6 +178,10 @@ public class DependencyReplacerDataService
 						ModifiableModuleModel projectModel =
 							projectModuleManager.getModifiableModel();
 
+						_log.info(
+							" ### Committing " + _COMMIT_GROUP_SIZE +
+								" changes...");
+
 						ModifiableModelCommitter.multiCommit(
 							populatedMappings.stream(
 							).map(
@@ -206,6 +191,8 @@ public class DependencyReplacerDataService
 								Collectors.toList()
 							),
 							projectModel);
+
+						_log.info(" ### Commited. Total: " + _totalCount);
 					}));
 		}
 		finally {
@@ -215,6 +202,47 @@ public class DependencyReplacerDataService
 				}
 			}
 		}
+	}
+
+	private void _updateMapping(DependencyMapping dependencyMapping) {
+		ModifiableRootModel ownerModel = dependencyMapping._ownerModel;
+
+		List<String> modifiedEntries = new ArrayList<>();
+
+		for (DependencyMappingItem dependencyMappingItem :
+			dependencyMapping._dependencyMappingItems) {
+
+			Library library =
+				dependencyMappingItem._originalDependency.getLibrary();
+
+			if (library == null) {
+				continue;
+			}
+
+			LibraryOrderEntry libraryOrderEntry =
+				ownerModel.findLibraryOrderEntry(library);
+
+			if (libraryOrderEntry == null) {
+				continue;
+			}
+
+			ownerModel.removeOrderEntry(libraryOrderEntry);
+
+			ModuleOrderEntry moduleOrderEntry =
+				ownerModel.addModuleOrderEntry(
+					dependencyMappingItem._replacementDependency);
+
+			moduleOrderEntry.setScope(
+				dependencyMappingItem._originalDependency.getScope());
+			moduleOrderEntry.setExported(false);
+
+			modifiedEntries.add(
+				dependencyMappingItem._replacementDependency.getName());
+		}
+
+		_log.info(
+			" ### Modified " + ownerModel.getModule().getName() +
+				" for " + modifiedEntries.toString());
 	}
 
 	private class DependencyMapping {
@@ -266,6 +294,8 @@ public class DependencyReplacerDataService
 			}
 		};
 
+	private static final int _COMMIT_GROUP_SIZE = 100;
+
 	private static final Logger _log = Logger.getInstance(
 		DependencyReplacerDataService.class);
 
@@ -273,5 +303,6 @@ public class DependencyReplacerDataService
 		new ConcurrentHashMap<>();
 	private final ConcurrentMap<String, DependencyMapping> _dependencyMappings =
 		new ConcurrentHashMap<>();
+	private int _totalCount = 0;
 
 }
