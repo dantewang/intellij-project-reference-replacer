@@ -294,7 +294,7 @@ public class DependencyReplacerDataService
 			}
 		};
 
-	private static final int _COMMIT_GROUP_SIZE = 100;
+	private static final int _COMMIT_GROUP_SIZE = 25;
 
 	private static final Logger _log = Logger.getInstance(
 		DependencyReplacerDataService.class);
