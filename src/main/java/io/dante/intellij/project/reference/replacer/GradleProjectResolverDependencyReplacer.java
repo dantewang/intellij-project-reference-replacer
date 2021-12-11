@@ -77,7 +77,7 @@ public class GradleProjectResolverDependencyReplacer extends AbstractProjectReso
 				while (iterator.hasNext()) {
 					ExternalDependency externalDependency = iterator.next();
 
-					String artifactMapped = _artifactMappings.get(
+					String artifactMapped = ReplacementUtil.findReplacementModuleName(
 						externalDependency.getGroup() + ":" + externalDependency.getName());
 
 					if (artifactMapped == null) {
@@ -194,27 +194,6 @@ public class GradleProjectResolverDependencyReplacer extends AbstractProjectReso
 			processor.process(moduleDataNode, sourceSet);
 		}
 	}
-
-	private static final String _GROUP_ID = "com.liferay.portal";
-
-	private static final Map<String, String> _artifactMappings =
-		new HashMap<>() {
-			{
-				put(_GROUP_ID + ":com.liferay.portal.impl", "portal-impl");
-				put(_GROUP_ID + ":com.liferay.portal.kernel", "portal-kernel");
-				put(_GROUP_ID + ":com.liferay.portal.test", "portal-test");
-				put(_GROUP_ID + ":com.liferay.util.bridges", "util-bridges");
-				put(_GROUP_ID + ":com.liferay.util.java", "util-java");
-				put(_GROUP_ID + ":com.liferay.util.slf4j", "util-slf4j");
-				put(_GROUP_ID + ":com.liferay.util.taglib", "util-taglib");
-				put(
-					_GROUP_ID + ":com.liferay.support.tomcat",
-					"support-tomcat");
-				put(
-					_GROUP_ID + ":com.liferay.portal.test.integration",
-					"portal-test-integration");
-			}
-		};
 
 	private static final Logger _logger = Logger.getInstance(GradleProjectResolverDependencyReplacer.class);
 

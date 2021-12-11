@@ -29,9 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -68,21 +66,10 @@ public class DependencyReplacerDataService
 			LibraryDependencyData libraryDependencyData =
 				libraryDependencyDataNode.getData();
 
-			String dependencyExternalName =
-				libraryDependencyData.getExternalName();
-
-			int index = dependencyExternalName.lastIndexOf(':');
-
-			if (index <= 0) {
-				continue;
-			}
-
-			String dependencyName = dependencyExternalName.substring(0, index);
-
-			String mappedName = _artifactMappings.get(dependencyName);
+			String mappedName = ReplacementUtil.findReplacementModuleName(libraryDependencyData);
 
 			if (mappedName == null) {
-				_log.debug("No mapping for " + dependencyName);
+				_log.debug("No mapping for " + libraryDependencyData.getExternalName());
 
 				continue;
 			}
@@ -272,27 +259,6 @@ public class DependencyReplacerDataService
 		private final Module _replacementDependency;
 
 	}
-
-	private static final String _GROUP_ID = "com.liferay.portal";
-
-	private static final Map<String, String> _artifactMappings =
-		new HashMap<String, String>() {
-			{
-				put(_GROUP_ID + ":com.liferay.portal.impl", "portal-impl");
-				put(_GROUP_ID + ":com.liferay.portal.kernel", "portal-kernel");
-				put(_GROUP_ID + ":com.liferay.portal.test", "portal-test");
-				put(_GROUP_ID + ":com.liferay.util.bridges", "util-bridges");
-				put(_GROUP_ID + ":com.liferay.util.java", "util-java");
-				put(_GROUP_ID + ":com.liferay.util.slf4j", "util-slf4j");
-				put(_GROUP_ID + ":com.liferay.util.taglib", "util-taglib");
-				put(
-					_GROUP_ID + ":com.liferay.support.tomcat",
-					"support-tomcat");
-				put(
-					_GROUP_ID + ":com.liferay.portal.test.integration",
-					"portal-test-integration");
-			}
-		};
 
 	private static final int _COMMIT_GROUP_SIZE = 25;
 
