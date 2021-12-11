@@ -58,24 +58,28 @@ public class LibraryDependencyReplacerDataService extends AbstractDependencyData
 				continue;
 			}
 
-			ModifiableRootModel modifiableRootModel = modelsProvider.getModifiableRootModel(module);
+			try {
+				ModifiableRootModel modifiableRootModel = modelsProvider.getModifiableRootModel(module);
 
-			LibraryOrderEntry originalDependency = (LibraryOrderEntry) modelsProvider.findIdeModuleOrderEntry(
-				libraryDependencyData);
+				LibraryOrderEntry originalDependency = (LibraryOrderEntry) modelsProvider.findIdeModuleOrderEntry(
+					libraryDependencyData);
 
-			assert originalDependency != null;
+				assert originalDependency != null;
 
-			Library library = originalDependency.getLibrary();
+				Library library = originalDependency.getLibrary();
 
-			assert library != null;
+				assert library != null;
 
-			modifiableRootModel.removeOrderEntry(
-				Objects.requireNonNull(modifiableRootModel.findLibraryOrderEntry(library)));
+				modifiableRootModel.removeOrderEntry(
+					Objects.requireNonNull(modifiableRootModel.findLibraryOrderEntry(library)));
 
-			OrderEntry orderEntry = ReadAction.compute(
-				() -> modifiableRootModel.addModuleOrderEntry(replacementDependencyModule));
+				OrderEntry orderEntry = ReadAction.compute(
+					() -> modifiableRootModel.addModuleOrderEntry(replacementDependencyModule));
 
-			orderEntryDataMap.put(orderEntry, libraryDependencyData);
+				orderEntryDataMap.put(orderEntry, libraryDependencyData);
+			}
+			catch (Exception exception) {
+			}
 		}
 
 		return orderEntryDataMap;
