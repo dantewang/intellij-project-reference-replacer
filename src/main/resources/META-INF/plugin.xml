@@ -7,14 +7,20 @@
 IntelliJ plugin to automatically replace artifact references of portal-kernel, etc. in Gradle imported modules with module references.
     ]]></description>
 
+    <depends>com.intellij.gradle</depends>
+
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
     <!-- uncomment to enable plugin in all products
     <depends>com.intellij.modules.lang</depends>
     -->
 
-    <extensions defaultExtensionNs="com.intellij">
+    <!--<extensions defaultExtensionNs="com.intellij">
         <externalProjectDataService implementation="io.dante.intellij.project.reference.replacer.DependencyReplacerDataService" />
+    </extensions>-->
+
+    <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
+        <projectResolve implementation="io.dante.intellij.project.reference.replacer.GradleProjectResolverDependencyReplacer" />
     </extensions>
 
     <actions>
