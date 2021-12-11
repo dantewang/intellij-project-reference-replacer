@@ -1,6 +1,7 @@
 package io.dante.intellij.project.reference.replacer;
 
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.Key;
 import com.intellij.openapi.externalSystem.model.ProjectKeys;
@@ -79,10 +80,17 @@ public class LibraryDependencyReplacerDataService extends AbstractDependencyData
 				orderEntryDataMap.put(orderEntry, libraryDependencyData);
 			}
 			catch (Exception exception) {
+				_log.error("Failed to replace " + module.getName() + "/" + libraryDependencyData.getExternalName());
+
+				if (_log.isDebugEnabled()) {
+					_log.debug(exception);
+				}
 			}
 		}
 
 		return orderEntryDataMap;
 	}
+
+	private static final Logger _log = Logger.getInstance(LibraryDependencyReplacerDataService.class);
 
 }
