@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'io.dante'
-version '1.1.0'
+version '1.1.1'
 
 sourceCompatibility = 11
 targetCompatibility = 11
@@ -19,5 +19,5 @@ dependencies {
 
 intellij {
     plugins = ['gradle']
-    version = '2021.2.2'
+    version = '2021.3'
 }
