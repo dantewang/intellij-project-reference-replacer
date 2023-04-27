@@ -37,6 +37,8 @@ import java.util.stream.Collectors;
 /**
  * @author Dante Wang
  */
+
+@Deprecated
 @Order(ExternalSystemConstants.UNORDERED)
 public class DependencyReplacerDataService
 	extends AbstractProjectDataService<LibraryDependencyData, Module> {

@@ -42,6 +42,7 @@ import java.util.Objects;
 /**
  * @author Dante Wang
  */
+@Deprecated
 public class GradleProjectResolverDependencyReplacer extends AbstractProjectResolverExtension {
 
 	@Override
