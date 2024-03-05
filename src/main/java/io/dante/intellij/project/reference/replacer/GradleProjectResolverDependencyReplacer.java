@@ -28,6 +28,7 @@ import org.jetbrains.plugins.gradle.model.ExternalSourceDirectorySet;
 import org.jetbrains.plugins.gradle.model.ExternalSourceSet;
 import org.jetbrains.plugins.gradle.model.data.GradleSourceSetData;
 import org.jetbrains.plugins.gradle.service.project.AbstractProjectResolverExtension;
+import org.jetbrains.plugins.gradle.service.project.ArtifactMappingService;
 import org.jetbrains.plugins.gradle.service.project.GradleProjectResolver;
 import org.jetbrains.plugins.gradle.service.project.GradleProjectResolverUtil;
 import org.jetbrains.plugins.gradle.service.project.ProjectResolverContext;
@@ -60,8 +61,7 @@ public class GradleProjectResolverDependencyReplacer extends AbstractProjectReso
 
 		ModuleManager moduleManager = ModuleManager.getInstance(intelliJProject);
 
-		Map<String, String> artifactsMap = Objects.requireNonNull(
-			ideProject.getUserData(GradleProjectResolver.CONFIGURATION_ARTIFACTS));
+		ArtifactMappingService artifactMappingService = resolverCtx.getArtifactsMap();
 
 		Map<String, Pair<DataNode<GradleSourceSetData>, ExternalSourceSet>> sourceSetMap =
 			Objects.requireNonNull(ideProject.getUserData(GradleProjectResolver.RESOLVED_SOURCE_SETS));
@@ -91,7 +91,7 @@ public class GradleProjectResolverDependencyReplacer extends AbstractProjectReso
 				}
 
 				GradleProjectResolverUtil.buildDependencies(
-					resolverCtx, sourceSetMap, artifactsMap, dataNode, dependencies, ideProject);
+					resolverCtx, sourceSetMap, artifactMappingService, dataNode, dependencies, ideProject);
 
 				for (Map.Entry<String, ExternalDependency> entry : toProcess.entrySet()) {
 					Module module = moduleManager.findModuleByName(entry.getKey());
