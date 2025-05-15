@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'io.dante'
-version '1.2.0'
+version '1.2.1'
 
 repositories {
     mavenCentral()
@@ -16,7 +16,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity '2024.3.5'
+        intellijIdeaCommunity '2025.1.1'
 
         bundledPlugin 'com.intellij.gradle'
     }
